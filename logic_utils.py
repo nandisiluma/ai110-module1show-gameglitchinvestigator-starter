@@ -14,11 +14,37 @@ def parse_guess(raw: str):
 
 def check_guess(guess, secret):
     """
-    Compare guess to secret and return (outcome, message).
+    Compare guess to secret and return outcome string.
 
-    outcome examples: "Win", "Too High", "Too Low"
+    Returns one of: "Win", "Too High", "Too Low".
     """
-    raise NotImplementedError("Refactor this function from app.py into logic_utils.py")
+    # Ensure we compare numerically when possible to avoid string
+    # lexicographic comparisons (the original app sometimes stored
+    # the secret as a string which caused incorrect high/low hints).
+    try:
+        g = int(guess)
+    except Exception:
+        # non-numeric guesses can't be compared numerically; coerce to str
+        g = guess
+
+    try:
+        s = int(secret)
+    except Exception:
+        s = secret
+
+    # Exact match
+    if g == s:
+        return "Win"
+
+    # If both are ints, do numeric comparison
+    if isinstance(g, int) and isinstance(s, int):
+        return "Too High" if g > s else "Too Low"
+
+    # Fallback: compare as strings for ordering
+    try:
+        return "Too High" if str(g) > str(s) else "Too Low"
+    except Exception:
+        return "Too Low"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
